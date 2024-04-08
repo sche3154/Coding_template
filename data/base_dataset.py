@@ -2,6 +2,7 @@
 
 It also includes common transformation functions (e.g., get_transform, __scale_width), which can be later used in subclasses.
 """
+
 import torch.utils.data as data
 from abc import ABC, abstractmethod
 
@@ -23,7 +24,7 @@ class BaseDataset(data.Dataset, ABC):
         """
         self.opt = opt
         self.root = opt.dataroot
-        self.isTrain = opt.isTrain
+    
 
     @staticmethod
     def modify_commandline_options(parser, is_train):
@@ -36,7 +37,6 @@ class BaseDataset(data.Dataset, ABC):
         Returns:
             the modified parser.
         """
-        
         return parser
 
     @abstractmethod
@@ -56,6 +56,3 @@ class BaseDataset(data.Dataset, ABC):
         """
         pass
 
-    @abstractmethod
-    def save_sample(self, img, suffix):
-        pass

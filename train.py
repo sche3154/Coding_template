@@ -28,8 +28,11 @@ if __name__ == '__main__':         # SIngle sample cropped, no pre-loaded batche
     model = create_model(opt)      # create a model given opt.model and other options
     model.setup(opt)               # regular setup: load and print networks; create schedulers
 
-    for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):
+    recorder = Recorder(opt)       # Recorder to monitor the progress
 
+    for epoch in range(opt.epoch_count, opt.n_epochs + opt.n_epochs_decay + 1):
+        
+        model.set_current_epoch(epoch)
         epoch_loss = {}
         epoch_start_time = time.time()  # timer for entire epoch
 
@@ -39,19 +42,20 @@ if __name__ == '__main__':         # SIngle sample cropped, no pre-loaded batche
 
             if opt.input_patch_size > 0: # now can handle patches
                 data_patched = {}
-                patch_nums = len(data[next(iter(data))])
-                for j in range(0, patch_nums, self.opt.input_batch_sizes):
-                    data_patched = {}
-                    for key, value in data.items()
-                        value = value.squeeze(0)
-                        data_patched[key] = value[j:min(j+self.opt.input_batch_sizes, patch_nums),...]
+                patch_nums = len(data[next(iter(data))].squeeze(0))
 
+                for j in range(0, patch_nums, opt.input_patch_size):
+                    data_patched = {}
+                    for key, value in data.items():
+                        value = value.squeeze(0)
+                        data_patched[key] = value[j % value.shape[0]:min((j % value.shape[0])+opt.input_patch_size, patch_nums),...]
+                        
                     model.set_input(data_patched)
                     model.optimize_parameters()
                     losses = model.get_current_losses()
-
+                    
                     for k, v in losses.items():
-                        epoch_loss[k] += v if epoch_loss[k] is not None else epoch_loss[k] = v
+                        epoch_loss[k] = epoch_loss[k] + v if k in epoch_loss else v
 
                     counter +=1
             else:
@@ -60,15 +64,15 @@ if __name__ == '__main__':         # SIngle sample cropped, no pre-loaded batche
                 losses = model.get_current_losses()
 
                 for k, v in losses.items():
-                    epoch_loss[k] += v if epoch_loss[k] is not None else epoch_loss[k] = v
+                    epoch_loss[k] = epoch_loss[k] + v if epoch_loss[k] is not None else v
 
                 counter +=1
-     
-        recorder.print_epoch_losses(epoch, epoch_loss/counter, time.time() - epoch_start_time)
+
+        recorder.print_epoch_losses(epoch, {k: v / counter for k, v in epoch_loss.items()}, time.time() - epoch_start_time)
         print('End of epoch %d / %d \t Time Taken: %d sec' % (epoch, opt.n_epochs + opt.n_epochs_decay, time.time() - epoch_start_time))
 
         if epoch % opt.save_epoch_freq == 0:  # cache our model every <save_epoch_freq> epochs
-            print('saving the model at the end of epoch %d, iters %d' % (epoch, total_iters))
+            print('saving the model at the end of epoch %d' % (epoch))
             model.save_networks('latest')
             model.save_networks(epoch)
     

@@ -4,7 +4,7 @@ def find_processing_using_name(processing_name):
     """
     Import the module "processing/[processing_name]_processing.py".
     """
-    processing_filename = "processing." + processing_name + "_processing"
+    processing_filename = "data.processing." + processing_name + "_processing"
     processinglib = importlib.import_module(processing_filename)
     processing = None
     target_processing_name = processing_name.replace('_', '') + 'processing'

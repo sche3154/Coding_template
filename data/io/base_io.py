@@ -10,7 +10,7 @@ class BaseIO(ABC):
         """
 
         self.opt = opt
-        self.root = opt.root
+        self.root = opt.dataroot
         self.isTrain = opt.isTrain
 
     #---------------------------------------------#
@@ -25,6 +25,10 @@ class BaseIO(ABC):
     #               save_data                     #
     #---------------------------------------------#
     @abstractmethod
-    def save_sample(self, sample, path):
+    def save_sample(self, sample):
 
         pass
+
+
+
+    

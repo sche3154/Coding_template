@@ -8,6 +8,7 @@ import copy
 import gzip
 import shutil
 import numpy as np
+from sklearn import metrics
 
 class Image (object):
     """
@@ -239,7 +240,7 @@ class Image (object):
         strides = [0 for _ in layout]
         stride, offset = int(dtype.itemsize), 0
         for dim in sorted(range(len(layout)), key=lambda k: int(layout[k][1:])):
-            if layout[dim][0] is '-':
+            if layout[dim][0] == '-':
                 strides[dim] = -stride
                 offset += (size[dim]-1) * stride
             else:
@@ -329,5 +330,4 @@ def load_mrtrix(filename, **kwargs):
 def save_mrtrix(filename, image):
     """ Save image in mrtrix format. """
     image.save(filename)
-
 
